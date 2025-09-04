@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "e2e": "playwright test",
+    "e2e:bdd": "echo 'BDD tests not implemented yet' && exit 0",
      "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
