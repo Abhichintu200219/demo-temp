@@ -13,7 +13,8 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.12",
