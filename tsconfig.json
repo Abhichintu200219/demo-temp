@@ -1,4 +1,61 @@
+// {
+//   "compilerOptions": {
+//     "target": "ES2020",
+//     "useDefineForClassFields": true,
+//     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+//     "module": "ESNext",
+//     "skipLibCheck": true,
+//     "moduleResolution": "bundler",
+//     "allowImportingTsExtensions": true,
+//     "resolveJsonModule": true,
+//     "isolatedModules": true,
+//     "noEmit": true,
+//     "jsx": "react-jsx",
+//     "strict": true,
+//     "noUnusedLocals": true,
+//     "noUnusedParameters": true,
+//      "allowUnusedLabels": true,
+//     "ignoreDeprecations": "5.0",
+//     "useUnknownInCatchVariables": false,
+//     "noFallthroughCasesInSwitch": true,
+//     "types": ["vitest/globals", "@testing-library/jest-dom"],
+//     "baseUrl": ".",
+//     "paths": {
+//       "@/*": ["./src/*"]
+//     },
+    
+    
+    
+//   },
+//   // "include": ["src"],
+//   "exclude": ["e2e", "tests"],
+//   "include": ["src", "e2e,tests"],
+
+//   // "exclude": ["dist", "node_modules"],
+
+//   "references": [{ "path": "./tsconfig.node.json" }]
+// }
+
+
 {
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext",
+      "target": "ES2020",
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
+      "allowImportingTsExtensions": true,
+      "noEmit": true,
+      "skipLibCheck": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"]
+      }
+    }
+  },
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -14,14 +71,19 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "allowUnusedLabels": true,
+    "ignoreDeprecations": "5.0",
+    "useUnknownInCatchVariables": false,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
-  "exclude": ["e2e", "tests"],
+  "include": ["src/**/*", "e2e/**/*"],
+  "exclude": ["dist", "node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

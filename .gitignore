@@ -26,8 +26,14 @@ dist-ssr
 # Testing
 coverage
 test-results/
+.nyc_output
 playwright-report/
 playwright/.cache/
+reports/
+screenshots/
+videos/
+trace/
+test-artifacts/
 
 # E2E reports
 e2e/reports/
