@@ -131,7 +131,7 @@ jobs:
     # Wait for server to be ready
     - name: Wait for server
       run: |
-        npx wait-on http://localhost:4173 --timeout 60000
+        npx wait-on http://localhost:4175 --timeout 60000
         echo "Server is ready"
 
     # Run BDD tests with specific browser
@@ -204,7 +204,7 @@ jobs:
       run: npm run preview &
 
     - name: Wait for server
-      run: npx wait-on http://localhost:4173 --timeout 60000
+      run: npx wait-on http://localhost:4175 --timeout 60000
 
     # Run pure Playwright tests if they exist
     - name: Run Playwright tests
