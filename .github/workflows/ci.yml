@@ -9,14 +9,15 @@ on:
 # Environment variables for consistent configuration
 env:
   NODE_VERSION: '20.19'
-  PLAYWRIGHT_BROWSERS_PATH: 0
+  # NOTE: removed PLAYWRIGHT_BROWSERS_PATH to let Playwright install browsers to default location.
+  # If you need a custom path, add it and ensure npx playwright install respects it.
 
 jobs:
   # Unit Tests
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -36,7 +37,6 @@ jobs:
     - name: Run unit tests with coverage
       run: npm run test:coverage
 
-    # Upload test coverage reports
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: always()
@@ -49,7 +49,7 @@ jobs:
     name: Build Application
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -66,7 +66,6 @@ jobs:
     - name: Build application
       run: npm run build
 
-    # Cache build artifacts for other jobs
     - name: Cache build output
       uses: actions/cache@v4
       with:
@@ -78,12 +77,11 @@ jobs:
     name: BDD E2E Tests (Cucumber + Playwright)
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     strategy:
       matrix:
-        # Run tests on different browsers
         browser: [chromium, firefox, webkit]
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -97,9 +95,17 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # Install Playwright browsers with dependencies
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps ${{ matrix.browser }}
+    # Install Playwright browsers + system dependencies (explicit, full install)
+    - name: Install Playwright browsers + deps
+      run: npx playwright install --with-deps
+
+    # OPTIONAL: debug listing of installed browsers (uncomment to help troubleshoot)
+    #- name: Debug - list playwright browsers
+    #  run: |
+    #    echo "Playwright env:"
+    #    env | grep -i PLAYWRIGHT || true
+    #    npx playwright --version || true
+    #    ls -la node_modules/playwright-core/.local-browsers || true
 
     - name: Create required directories
       run: |
@@ -107,7 +113,6 @@ jobs:
         mkdir -p reports
         mkdir -p test-results
 
-    # Restore build artifacts from build job
     - name: Restore build output
       uses: actions/cache@v4
       with:
@@ -120,21 +125,18 @@ jobs:
           npm run build
         fi
 
-    # Start the application in background
     - name: Start application
       run: |
-        npm run preview &
+        npm run preview &              # start preview server in background
         echo "Started preview server"
       env:
         CI: true
 
-    # Wait for server to be ready - FIXED PORT
     - name: Wait for server
       run: |
         npx wait-on http://localhost:4173 --timeout 60000
         echo "Server is ready"
 
-    # Run BDD tests with specific browser
     - name: Run BDD E2E Tests
       run: npm run test:e2e
       env:
@@ -143,8 +145,7 @@ jobs:
         CI: true
         PARALLEL: 1
 
-    # Upload test artifacts on failure
-    - name: Upload test artifacts
+    - name: Upload test artifacts (on failure)
       uses: actions/upload-artifact@v4
       if: failure()
       with:
@@ -155,7 +156,6 @@ jobs:
           test-results/
         retention-days: 7
 
-    # Upload BDD reports
     - name: Upload BDD Reports
       uses: actions/upload-artifact@v4
       if: always()
@@ -171,7 +171,7 @@ jobs:
     name: Playwright Tests
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -185,7 +185,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Install Playwright browsers
+    - name: Install Playwright browsers + deps
       run: npx playwright install --with-deps
 
     - name: Restore build output
@@ -203,15 +203,12 @@ jobs:
     - name: Start application
       run: npm run preview &
 
-    # Wait for server - FIXED PORT
     - name: Wait for server
       run: npx wait-on http://localhost:4173 --timeout 60000
 
-    # Run pure Playwright tests if they exist
-    - name: Run Playwright tests
+    - name: Run pure Playwright tests
       run: npm run test:playwright || echo "No Playwright tests found"
 
-    # Upload Playwright reports
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
       if: always()
@@ -226,7 +223,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit-tests, build, bdd-e2e-tests, playwright-tests]
     if: always()
-    
+
     steps:
     - name: Check test results
       run: |
@@ -235,31 +232,29 @@ jobs:
         echo "Build: ${{ needs.build.result }}"
         echo "BDD E2E Tests: ${{ needs.bdd-e2e-tests.result }}"
         echo "Playwright Tests: ${{ needs.playwright-tests.result }}"
-        
-        # Count successful jobs
+
         declare -i success_count=0
-        
+
         if [[ "${{ needs.unit-tests.result }}" == "success" ]]; then
           success_count+=1
         fi
-        
+
         if [[ "${{ needs.build.result }}" == "success" ]]; then
           success_count+=1
         fi
-        
+
         if [[ "${{ needs.bdd-e2e-tests.result }}" == "success" ]]; then
           success_count+=1
         fi
-        
+
         if [[ "${{ needs.playwright-tests.result }}" == "success" || "${{ needs.playwright-tests.result }}" == "skipped" ]]; then
           success_count+=1
         fi
-        
+
         echo "✅ Successful jobs: $success_count/4"
-        
-        # Determine overall result
-        if [[ "${{ needs.unit-tests.result }}" == "success" && 
-              "${{ needs.build.result }}" == "success" && 
+
+        if [[ "${{ needs.unit-tests.result }}" == "success" &&
+              "${{ needs.build.result }}" == "success" &&
               "${{ needs.bdd-e2e-tests.result }}" == "success" ]]; then
           echo "🎉 All critical tests passed!"
           exit 0
@@ -274,7 +269,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit-tests, build, bdd-e2e-tests]
     if: github.ref == 'refs/heads/main' && needs.unit-tests.result == 'success' && needs.build.result == 'success' && needs.bdd-e2e-tests.result == 'success'
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -295,8 +290,4 @@ jobs:
       run: |
         echo "🚀 Deploying to production..."
         # Add your deployment commands here
-        # Examples:
-        # - Deploy to Vercel: npx vercel --prod
-        # - Deploy to Netlify: npx netlify deploy --prod
-        # - Deploy to AWS S3: aws s3 sync dist/ s3://your-bucket
         echo "✅ Deployment completed!"
