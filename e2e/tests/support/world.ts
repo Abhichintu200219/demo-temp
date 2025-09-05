@@ -18,7 +18,7 @@ export class CustomWorld extends World {
     super(options);
     
     // Get configuration from world parameters
-    this.baseURL = options.parameters?.baseURL || 'http://localhost:4175';
+    this.baseURL = options.parameters?.baseURL || 'http://localhost:4173';
     this.browserOptions = options.parameters?.browserOptions || { headless: true };
   }
 

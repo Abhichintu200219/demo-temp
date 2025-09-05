@@ -128,10 +128,10 @@ jobs:
       env:
         CI: true
 
-    # Wait for server to be ready
+    # Wait for server to be ready - FIXED PORT
     - name: Wait for server
       run: |
-        npx wait-on http://localhost:4175 --timeout 60000
+        npx wait-on http://localhost:4173 --timeout 60000
         echo "Server is ready"
 
     # Run BDD tests with specific browser
@@ -203,8 +203,9 @@ jobs:
     - name: Start application
       run: npm run preview &
 
+    # Wait for server - FIXED PORT
     - name: Wait for server
-      run: npx wait-on http://localhost:4175 --timeout 60000
+      run: npx wait-on http://localhost:4173 --timeout 60000
 
     # Run pure Playwright tests if they exist
     - name: Run Playwright tests
