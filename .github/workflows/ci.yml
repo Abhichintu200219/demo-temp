@@ -263,31 +263,41 @@ jobs:
           exit 1
         fi
 
-  # Deploy (runs only on main branch and all tests pass)
   deploy:
-    name: Deploy to Production
+    name: Deploy to Production (NGINX)
     runs-on: ubuntu-latest
-    needs: [unit-tests, build, bdd-e2e-tests]
-    if: github.ref == 'refs/heads/main' && needs.unit-tests.result == 'success' && needs.build.result == 'success' && needs.bdd-e2e-tests.result == 'success'
+    needs: [unit-tests, build, bdd-e2e-tests]   # deploy only after these succeed
+    if: github.ref == 'refs/heads/main' && 
+        needs.unit-tests.result == 'success' && 
+        needs.build.result == 'success' && 
+        needs.bdd-e2e-tests.result == 'success'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+      - name: Restore build output
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: build-${{ github.sha }}
 
-    - name: Restore build output
-      uses: actions/cache@v4
-      with:
-        path: dist
-        key: build-${{ github.sha }}
+      # Copy build files to the server
+      - name: Upload dist to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "dist/*"
+          target: "/var/www/frontend/"
 
-    - name: Deploy application
-      run: |
-        echo "🚀 Deploying to production..."
-        # Add your deployment commands here
-        echo "✅ Deployment completed!"
+      # Restart NGINX after deploy
+      - name: Restart NGINX
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            sudo systemctl restart nginx

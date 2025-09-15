@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest --watch",
-     "// BDD + Playwright Scripts": "Scripts for running BDD and E2E tests",
+    "// BDD + Playwright Scripts": "Scripts for running BDD and E2E tests",
     "test:e2e": "NODE_NO_WARNINGS=1 NODE_OPTIONS='--loader ts-node/esm --experimental-specifier-resolution=node' cucumber-js \"e2e/tests/features/**/*.feature\" --import \"e2e/tests/step-definitions/**/*.ts\" --import \"e2e/tests/support/**/*.ts\"",
     "test:e2e:headed": "HEADLESS=false npm run test:e2e",
     "test:e2e:debug": "npm run test:e2e -- --debug",
@@ -33,10 +33,12 @@
     "build:preview": "npm run build && npm run preview"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.12",
     "fs-extra": "^11.3.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-redux": "^9.2.0",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
